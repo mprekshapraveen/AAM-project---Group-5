@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SolarShare - Community Solar & Virtual Net-Metering</title>
+    <style>
+        :root {
+            --primary: #0e8388;
+            --primary-dark: #2e4f4f;
+            --secondary: #f2e3c6;
+            --accent: #ffb84c;
+            --bg-light: #f8f9fa;
+            --text-dark: #2b2d42;
+            --text-muted: #6c757d;
+            --white: #ffffff;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        header {
+            background-color: var(--primary-dark);
+            color: var(--white);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem;
+        }
+
+        .nav-links a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            cursor: pointer;
+            padding: 0.5rem 0.8rem;
+            border-radius: 4px;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--accent);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 5px;
+        }
+
+        .hamburger span {
+            width: 25px;
+            height: 3px;
+            background-color: var(--white);
+            border-radius: 2px;
+        }
+
+        /* Page Layout Views */
+        .page-view {
+            display: none;
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            min-height: 80vh;
+        }
+
+        .page-view.active {
+            display: block;
+        }
+
+        /* Typography & Layout Helpers */
+        h1, h2, h3 {
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            color: var(--white);
+            padding: 4rem 2rem;
+            border-radius: var(--radius);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .hero h1 {
+            color: var(--white);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--accent);
+            color: var(--primary-dark);
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.3s, transform 0.1s;
+        }
+
+        .btn:hover {
+            background-color: #e0a030;
+            transform: translateY(-2px);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid #e0e0e0;
+        }
+
+        /* Interactive Feature 1: Calculator */
+        .calculator-box {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .results-box {
+            background: #eef7f6;
+            border-left: 5px solid var(--primary);
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border-radius: 0 var(--radius) var(--radius) 0;
+        }
+
+        .metric {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Interactive Feature 2: Site Filter */
+        .filter-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: #e0e0e0;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 12px;
+            width: 100%;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .progress-fill {
+            background: var(--accent);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5rem ease;
+        }
+
+        /* References Section */
+        .references-list {
+            list-style: decimal;
+            padding-left: 1.5rem;
+        }
+
+        .references-list li {
+            margin-bottom: 0.8rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--primary-dark);
+            color: var(--white);
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                background-color: var(--primary-dark);
+                padding: 1rem 0;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            }
+
+            .nav-links.show {
+                display: flex;
+            }
+
+            .hamburger {
+                display: flex;
+            }
+
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header / Navigation -->
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                ☀️ SolarShare
+            </div>
+            <ul class="nav-links" id="navLinks">
+                <li><a onclick="navigateTo('home')" class="nav-item active" id="nav-home">Home & Problem</a></li>
+                <li><a onclick="navigateTo('solution')" class="nav-item" id="nav-solution">Our Solution</a></li>
+                <li><a onclick="navigateTo('discovery')" class="nav-item" id="nav-discovery">Discover Sites</a></li>
+                <li><a onclick="navigateTo('calculator')" class="nav-item" id="nav-calculator">Investment Calc</a></li>
+                <li><a onclick="navigateTo('references')" class="nav-item" id="nav-references">References</a></li>
+            </ul>
+            <div class="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <!-- PAGE 1: HOME & PROBLEM DESCRIPTION -->
+    <main id="home" class="page-view active">
+        <section class="hero">
+            <h1>Democratizing Clean Solar Energy for Everyone</h1>
+            <p>Bridging the gap for renters, flat owners, and shaded-roof residents through fractional community solar investment.</p>
+            <br>
+            <button class="btn" onclick="navigateTo('discovery')">Explore Shared Sites</button>
+        </section>
+
+        <section class="grid-2">
+            <div class="card">
+                <h2>The Environmental Problem</h2>
+                <p><strong>Low Adoption of Renewable Energy</strong>[cite: 1]: Despite falling equipment costs and supportive schemes like PM Surya Ghar and ANERT Soura, voluntary rooftop solar adoption remains severely bottlenecked.</p>
+                <p>The primary driver is <strong>Structural Exclusion</strong>:</p>
+                <ul style="margin-left: 1.2rem; margin-top: 0.5rem;">
+                    <li>Urban renters and tenants lack property alteration rights.</li>
+                    <li>Apartment dwellers lack individual terrace ownership.</li>
+                    <li>Shaded or structurally weak roof owners cannot host systems independently.</li>
+                </ul>
+                <p style="margin-top: 0.5rem;">This forces a major segment of the urban population to rely entirely on fossil-fuel-dominated grid power.</p>
+            </div>
+
+            <div class="card">
+                <h2>Target Users & Alignment</h2>
+                <p><strong>Target User Demographics:</strong></p>
+                <ul style="margin-left: 1.2rem; margin-bottom: 1rem;">
+                    <li>Apartment & Flat Residents (e.g., Residents Welfare Associations).</li>
+                    <li>Tenants and Urban Renters seeking green energy offsets.</li>
+                    <li>Institutional clusters & households with unsuited roof structures.</li>
+                </ul>
+                <p><strong>Sustainability Alignment (SDG 7, 11, 13):</strong></p>
+                <p>By enabling group investments, SolarShare directly aligns with <strong>SDG 7 (Affordable and Clean Energy)</strong>[cite: 1] and <strong>SDG 13 (Climate Action)</strong> by replacing coal-heavy grid energy with localized, clean generation. It fulfills <strong>ISO 14001</strong> continual improvement guidelines for residential clusters.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- PAGE 2: ENGINEERING / IT SOLUTION -->
+    <main id="solution" class="page-view">
+        <h2>The Selected Engineering/IT Solution</h2>
+        <p style="margin-bottom: 1.5rem;">SolarShare is a web platform leveraging Virtual Net-Metering (VNM) and fractional ownership ledgers to unite co-investors with available commercial/residential rooftop spaces.</p>
+
+        <div class="grid-3">
+            <div class="card">
+                <h3>1. Site Discovery & Solar API</h3>
+                <p>Connects community roofs with open solar irradiance databases (NASA POWER API) to assess generation capacity and ideal kW installation sizes.</p>
+            </div>
+            <div class="card">
+                <h3>2. Fractional Ownership Ledger</h3>
+                <p>Enables micro-investments down to fractions of a panel. Keeps a transparent, auditable breakdown of participant shares and ownership rights.</p>
+            </div>
+            <div class="card">
+                <h3>3. Virtual Net-Metering Allocation Engine</h3>
+                <p>Calculates proportional grid-export credits and maps generation directly to DISCOM electricity bills or internal credit adjustments.</p>
+            </div>
+            <div class="card">
+                <h3>4. Financial & Subsidy Matcher</h3>
+                <p>Automates payback calculations and integrates group subsidies under schemes like PM Surya Ghar and PM-KUSUM.</p>
+            </div>
+            <div class="card">
+                <h3>5. Installer & Vendor Portal</h3>
+                <p>Allows MNRE-empanelled solar vendors to tender bids, ensuring quality installations and transparent warranties.</p>
+            </div>
+            <div class="card">
+                <h3>6. Real-Time CO₂ Dashboard</h3>
+                <p>Provides co-investors live analytics on total kWh generated, grid cost savings, and collective metric tons of CO₂ avoided.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- PAGE 3: DISCOVER SITES (INTERACTIVE FEATURE 1) -->
+    <main id="discovery" class="page-view">
+        <h2>Shared Solar Community Sites</h2>
+        <p>Explore nearby community solar projects seeking co-investors. Filter by location status to find an active project.</p>
+        
+        <!-- Interactive Control: Filter -->
+        <div class="filter-controls" style="margin-top: 1rem;">
+            <button class="filter-btn active" onclick="filterSites('all', this)">All Projects</button>
+            <button class="filter-btn" onclick="filterSites('Kochi', this)">Kochi</button>
+            <button class="filter-btn" onclick="filterSites('Trivandrum', this)">Trivandrum</button>
+            <button class="filter-btn" onclick="filterSites('Calicut', this)">Calicut</button>
+        </div>
+
+        <div class="grid-3" id="siteGrid">
+            <!-- Dynamic site cards inserted by JS -->
+        </div>
+    </main>
+
+    <!-- PAGE 4: INVESTMENT CALCULATOR (INTERACTIVE FEATURE 2) -->
+    <main id="calculator" class="page-view">
+        <h2>Virtual Net-Metering & Return Calculator</h2>
+        <p style="margin-bottom: 1.5rem;">Estimate your proportional ownership, monthly bill savings, and payback horizon based on your contribution.</p>
+
+        <div class="grid-2">
+            <div class="calculator-box">
+                <div class="form-group">
+                    <label for="investmentRange">Investment Amount (₹): <span id="investVal">25,000</span></label>
+                    <input type="range" id="investmentRange" min="5000" max="150000" step="5000" value="25000" oninput="calculateReturns()">
+                </div>
+
+                <div class="form-group">
+                    <label for="projectCapacity">Project Total Capacity (kW)</label>
+                    <select id="projectCapacity" onchange="calculateReturns()">
+                        <option value="20">20 kW (Apartment Terrace)</option>
+                        <option value="50">50 kW (Commercial Hub)</option>
+                        <option value="100">100 kW (Community Plot)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="tariffRate">Current Electricity Tariff (₹/unit)</label>
+                    <input type="number" id="tariffRate" value="6.5" step="0.1" oninput="calculateReturns()">
+                </div>
+            </div>
+
+            <div class="results-box">
+                <h3>Projected Impact & Returns</h3>
+                <br>
+                <p>Estimated Share Ownership:</p>
+                <div class="metric" id="sharePct">2.08%</div>
+                <br>
+                <p>Estimated Monthly Solar Generation Offset:</p>
+                <div class="metric" id="monthlyUnits">125 kWh</div>
+                <br>
+                <p>Estimated Annual Electricity Bill Savings:</p>
+                <div class="metric" id="annualSavings">₹ 9,750</div>
+                <br>
+                <p>Estimated CO₂ Offset (Annual):</p>
+                <div class="metric" id="co2Offset" style="color:#2e4f4f;">1.2 Tons</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- PAGE 5: REFERENCES -->
+    <main id="references" class="page-view">
+        <h2>References & External Resources</h2>
+        <p style="margin-bottom: 1rem;">Academic, governmental, and technical sources cited in the platform architecture and report[cite: 1]:</p>
+
+        <div class="card">
+            <ol class="references-list">
+                <li><strong>United Nations.</strong> Sustainable Development Goal 7: Affordable and Clean Energy. UN Department of Economic and Social Affairs[cite: 1].</li>
+                <li><strong>Ministry of New and Renewable Energy (MNRE), Govt of India.</strong> PM Surya Ghar: Muft Bijli Yojana National Portal.</li>
+                <li><strong>ANERT, Govt of Kerala.</strong> Soura & Soura Thejus Community and Rooftop Solar Initiatives.</li>
+                <li><strong>Oxford Academic (Clean Energy Journal).</strong> "Unveiling the Shadows: A Qualitative Exploration of Barriers to Rooftop Solar Photovoltaic Adoption in Residential Sectors," 2024.</li>
+                <li><strong>International Organization for Standardization.</strong> ISO 14001:2015 - Environmental Management Systems Requirements.</li>
+                <li><strong>NASA Langley Research Center.</strong> POWER Project Solar Data API Services.</li>
+                <li><strong>Kerala State Electricity Regulatory Commission (KSERC).</strong> Draft Renewable Energy Regulations (Group & Virtual Net-Metering Provisions), 2025.</li>
+                <li><strong>Government of Kerala.</strong> Draft Power Policy 2025: Capacity Addition Targets.</li>
+                <li><strong>International Renewable Energy Agency (IRENA).</strong> Renewable Power Generation Costs & LCA Methodology.</li>
+                <li><strong>Ministry of Environment, Forest and Climate Change (MoEFCC).</strong> EIA Notification Standards, India.</li>
+            </ol>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 SolarShare Platform | Engineering & IT Solution for Sustainable Energy Access</p>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Sample Project Sites Data
+        const sitesData = [
+            { id: 1, name: "Skyline Green Terrace", location: "Kochi", target: 1200000, raised: 840000, capacity: "30 kW" },
+            { id: 2, name: "Harmony Heights RWA", location: "Trivandrum", target: 800000, raised: 600000, capacity: "20 kW" },
+            { id: 3, name: "Malabar Traders Hub", location: "Calicut", target: 2000000, raised: 900000, capacity: "50 kW" },
+            { id: 4, name: "Oceanic Apartments", location: "Kochi", target: 1500000, raised: 1350000, capacity: "40 kW" }
+        ];
+
+        // Multi-page Single Page Navigation
+        function navigateTo(pageId) {
+            const pages = document.querySelectorAll('.page-view');
+            pages.forEach(p => p.classList.remove('active'));
+
+            const selectedPage = document.getElementById(pageId);
+            if (selectedPage) {
+                selectedPage.classList.add('active');
+            }
+
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => item.classList.remove('active'));
+
+            const activeNav = document.getElementById('nav-' + pageId);
+            if (activeNav) {
+                activeNav.classList.add('active');
+            }
+
+            // Close mobile menu if open
+            document.getElementById('navLinks').classList.remove('show');
+
+            // Trigger updates if navigating to specific pages
+            if(pageId === 'discovery') renderSites('all');
+            if(pageId === 'calculator') calculateReturns();
+
+            window.scrollTo(0,0);
+        }
+
+        // Toggle Responsive Mobile Navbar
+        function toggleMenu() {
+            const navLinks = document.getElementById('navLinks');
+            navLinks.classList.toggle('show');
+        }
+
+        // Interactive Feature 1: Filterable Project Sites
+        function renderSites(filter) {
+            const grid = document.getElementById('siteGrid');
+            grid.innerHTML = '';
+
+            const filtered = filter === 'all' ? sitesData : sitesData.filter(s => s.location === filter);
+
+            filtered.forEach(site => {
+                const pct = Math.round((site.raised / site.target) * 100);
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <h3>${site.name}</h3>
+                    <p><strong>Location:</strong> ${site.location}</p>
+                    <p><strong>Target Capacity:</strong> ${site.capacity}</p>
+                    <p><strong>Funded:</strong> ₹${site.raised.toLocaleString()} / ₹${site.target.toLocaleString()}</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${pct}%"></div>
+                    </div>
+                    <p style="font-size:0.9rem; text-align:right;">${pct}% Funded</p>
+                    <br>
+                    <button class="btn" style="width:100%;" onclick="navigateTo('calculator')">Co-Invest Now</button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterSites(loc, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderSites(loc);
+        }
+
+        // Interactive Feature 2: Payback & Net-Metering Investment Calculator
+        function calculateReturns() {
+            const investment = parseFloat(document.getElementById('investmentRange').value);
+            const projectKW = parseFloat(document.getElementById('projectCapacity').value);
+            const tariff = parseFloat(document.getElementById('tariffRate').value);
+
+            document.getElementById('investVal').innerText = investment.toLocaleString();
+
+            // Total estimated cost at ₹60,000 per kW
+            const totalProjectCost = projectKW * 60000;
+            const sharePercentage = (investment / totalProjectCost) * 100;
+
+            // Average generation: 4 kWh (units) per kW per day in Kerala solar conditions
+            const monthlyProjectGen = projectKW * 4 * 30; 
+            const userMonthlyGen = (monthlyProjectGen * sharePercentage) / 100;
+            
+            const annualSavingsVal = userMonthlyGen * 12 * tariff;
+            
+            // Grid carbon factor approx 0.82 kg CO2 per kWh
+            const annualCO2Tons = (userMonthlyGen * 12 * 0.82) / 1000;
+
+            document.getElementById('sharePct').innerText = sharePercentage.toFixed(2) + "%";
+            document.getElementById('monthlyUnits').innerText = Math.round(userMonthlyGen) + " kWh";
+            document.getElementById('annualSavings').innerText = "₹ " + Math.round(annualSavingsVal).toLocaleString();
+            document.getElementById('co2Offset').innerText = annualCO2Tons.toFixed(2) + " Tons";
+        }
+
+        // Initial Setup
+        window.onload = function() {
+            renderSites('all');
+            calculateReturns();
+        };
+    </script>
+</body>
+</html>
